@@ -73,3 +73,91 @@ const response = await validateSAT({
 
 console.log('Estado:', response.Estado); // Vigente, Cancelado, No Encontrado
 ```
+
+## Referencia de API
+
+### CFDIData (Interfaz Principal)
+
+Objeto resultante del parseo y procesamiento.
+
+| Campo | Tipo | Descripcion |
+| :--- | :--- | :--- |
+| `info` | `Info` | Datos generales del comprobante (Version, Total, Moneda, Fecha, etc.) |
+| `emisor` | `Emisor` | RFC, Nombre y Regimen Fiscal del emisor |
+| `receptor` | `Receptor` | RFC, Nombre y Uso de CFDI del receptor |
+| `timbre` | `Timbre` | Datos del Timbre Fiscal Digital (UUID, Fecha, Sellos) |
+| `conceptos` | `Concepto[]` | Listado detallado de conceptos facturados |
+| `validation_sat` | `ValidationSat` | (Opcional) Resultado de la validacion ante el SAT |
+
+### Detalles de Tipos
+
+#### Info
+| Campo | Tipo |
+| :--- | :--- |
+| `Version` | `string` |
+| `Serie` | `string` |
+| `Folio` | `string` |
+| `Fecha` | `string` |
+| `SubTotal` | `string` |
+| `Moneda` | `string` |
+| `Total` | `string` |
+| `TipoDeComprobante` | `string` |
+| `MetodoPago` | `string` |
+| `LugarExpedicion` | `string` |
+
+#### Emisor
+| Campo | Tipo |
+| :--- | :--- |
+| `rfc` | `string` |
+| `nombre` | `string` |
+| `RegimenFiscal` | `string` |
+
+#### Receptor
+| Campo | Tipo |
+| :--- | :--- |
+| `rfc` | `string` |
+| `nombre` | `string` |
+| `DomicilioFiscalReceptor` | `string` |
+| `RegimenFiscalReceptor` | `string` |
+| `UsoCFDI` | `string` |
+
+#### Timbre
+| Campo | Tipo |
+| :--- | :--- |
+| `UUID` | `string` |
+| `FechaTimbrado` | `string` |
+| `RfcProvCertif` | `string` |
+| `SelloCFD` | `string` |
+| `NoCertificadoSAT` | `string` |
+| `SelloSAT` | `string` |
+
+#### Concepto
+| Campo | Tipo |
+| :--- | :--- |
+| `ClaveProdServ` | `string` |
+| `NoIdentificacion` | `string` |
+| `Cantidad` | `string` |
+| `ClaveUnidad` | `string` |
+| `Unidad` | `string` |
+| `Descripcion` | `string` |
+| `ValorUnitario` | `string` |
+| `Importe` | `string` |
+| `ObjetoImp` | `string` |
+
+#### ValidationSat
+| Campo | Tipo | Descripcion |
+| :--- | :--- | :--- |
+| `status` | `string` | Estado de la peticion ('success', 'error', 'pending') |
+| `is_valid` | `boolean` | Indica si el comprobante es Vigente ante el SAT |
+| `message` | `string` | Mensaje de error en caso de fallo |
+| `details` | `SATValidationResponse` | Respuesta completa del servicio SOAP del SAT |
+
+### Funciones
+
+- `parseXML(xml: string): CFDIData`: Analiza el contenido XML y devuelve el objeto estructurado.
+- `validateSAT(req: SATValidationRequest): Promise<SATValidationResponse>`: Consulta el estado del CFDI en los servidores del SAT.
+- `processCFDI(xml: string): Promise<CFDIData>`: Ejecuta el flujo completo (parseo + validacion).
+
+## Licencia
+
+MIT
