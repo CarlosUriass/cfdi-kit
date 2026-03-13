@@ -1,7 +1,15 @@
 {
   "name": "cfdi-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Librería minimalista para parsear y validar CFDIs (SAT México) en TypeScript",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarlosUriass/cfdi-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CarlosUriass/cfdi-kit/issues"
+  },
+  "homepage": "https://github.com/CarlosUriass/cfdi-kit#readme",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
