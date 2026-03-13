@@ -1,4 +1,36 @@
 {
+  "name": "cfdi-kit",
+  "version": "1.0.0",
+  "description": "Librería minimalista para parsear y validar CFDIs (SAT México) en TypeScript",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup index.ts --format cjs,esm --watch --dts",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cfdi",
+    "sat",
+    "mexico",
+    "facturacion",
+    "xml",
+    "parser"
+  ],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^25.5.0",
     "tsup": "^8.5.1",
