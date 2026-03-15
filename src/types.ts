@@ -1,10 +1,26 @@
-export interface CFDIData {
+export class CFDIData {
   info: Info
   emisor: Emisor
   receptor: Receptor
   timbre: Timbre
   conceptos: Concepto[]
   validation_sat?: ValidationSat
+
+  constructor(data: {
+    info: Info;
+    emisor: Emisor;
+    receptor: Receptor;
+    timbre: Timbre;
+    conceptos: Concepto[];
+    validation_sat?: ValidationSat;
+  }) {
+    this.info = data.info;
+    this.emisor = data.emisor;
+    this.receptor = data.receptor;
+    this.timbre = data.timbre;
+    this.conceptos = data.conceptos;
+    this.validation_sat = data.validation_sat;
+  }
 }
 
 export interface ValidationSat {

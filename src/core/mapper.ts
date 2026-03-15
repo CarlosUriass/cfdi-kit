@@ -80,11 +80,11 @@ export function mapCFDI(raw: any): CFDIData {
     ObjetoImp: item.ObjetoImp,
   }));
 
-  return {
+  return new CFDIData({
     info,
     emisor,
     receptor,
     timbre,
     conceptos,
-  };
+  });
 }
