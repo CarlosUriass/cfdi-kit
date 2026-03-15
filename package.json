@@ -31,11 +31,17 @@
   },
   "keywords": [
     "cfdi",
+    "cfdi 4.0",
     "sat",
     "mexico",
     "facturacion",
+    "factura electronica",
     "xml",
-    "parser"
+    "parser",
+    "validacion",
+    "timbre fiscal",
+    "nexus",
+    "contabilidad"
   ],
   "author": "",
   "license": "MIT",

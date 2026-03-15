@@ -1,163 +1,103 @@
-# cfdi-kit
+# CFDI Kit
 
-Libreria minimalista para el procesamiento de Comprobantes Fiscales Digitales por Internet (CFDI) en Node.js y navegadores, escrita íntegramente en TypeScript.
+Librería para el procesamiento de Comprobantes Fiscales Digitales por Internet (CFDI 4.0) en Node.js y navegadores.
 
-Permite parsear archivos XML de facturación mexicana (SAT) y validar su estado de vigencia a través del servicio SOAP oficial en un solo flujo de trabajo.
+[![npm version](https://img.shields.io/npm/v/cfdi-kit.svg?style=flat-square)](https://www.npmjs.com/package/cfdi-kit)
+[![license](https://img.shields.io/github/license/CarlosUriass/cfdi-kit.svg?style=flat-square)](LICENSE)
+[![typescript](https://img.shields.io/badge/TypeScript-Ready-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 
-## Instalacion
+**cfdi-kit** es una solución diseñada para simplificar la integración de facturación electrónica mexicana en aplicaciones modernas. Proporciona herramientas para el parseo, validación y extracción de datos fiscales de forma eficiente.
+
+---
+
+## Características
+
+- **Procesamiento de CFDI 4.0**: Extracción completa de datos de comprobantes vigentes.
+- **Validación SAT**: Consulta de vigencia mediante el servicio SOAP oficial en un solo flujo.
+- **Cálculos Fiscales**: Métodos integrados para obtener totales de IVA, ISR y otras retenciones.
+- **Compatibilidad**: Funciona en entornos Node.js y navegadores.
+- **Persistencia**: Capacidad de exportar datos procesados a formato JSON.
+
+---
+
+## Instalación
 
 ```bash
 npm install cfdi-kit
 ```
 
-## Uso Principal
+---
 
-La forma mas sencilla de utilizar la libreria es a traves de la funcion `processCFDI`. Esta funcion acepta el contenido del XML como un string. Si tienes un archivo en disco, debes leerlo previamente.
+## Integración con NestJS
+
+Ejemplo de implementación en un servicio de NestJS para el procesamiento de facturas:
 
 ```typescript
-import { processCFDI } from 'cfdi-kit';
-import { readFileSync } from 'fs';
+import { Injectable, Logger } from '@nestjs/common';
+import { processCFDI, CFDIData } from 'cfdi-kit';
 
-// Lectura de un archivo XML local
-const xmlContent = readFileSync('mi_factura.xml', 'utf-8');
+@Injectable()
+export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
 
-async function main() {
-  try {
-    // Procesa y valida en un solo flujo
-    const data = await processCFDI(xmlContent);
+  async processInvoice(xmlString: string): Promise<any> {
+    try {
+      // Procesa y valida ante el SAT
+      const cfdi: CFDIData = await processCFDI(xmlString);
 
-    console.log('UUID:', data.timbre.UUID);
-    console.log('RFC Emisor:', data.emisor.rfc);
-    console.log('RFC Receptor:', data.receptor.rfc);
-    console.log('Total:', data.info.Total);
+      if (cfdi.isPPD()) {
+        this.logger.log(`UUID: ${cfdi.timbre.UUID} comercializado como PPD`);
+      }
 
-    if (data.validation_sat?.is_valid) {
-      console.log('La factura es vigente ante el SAT');
+      return {
+        uuid: cfdi.timbre.UUID,
+        emisor: cfdi.emisor.nombre,
+        total: cfdi.info.Total,
+        iva: cfdi.getIVA(),
+        isr: cfdi.getRetenciones().ISR,
+        fecha: cfdi.getFechaEmision(),
+        valido: cfdi.validation_sat?.is_valid
+      };
+    } catch (error) {
+      this.logger.error('Error al procesar el CFDI', error.stack);
+      throw error;
     }
-  } catch (error) {
-    console.error('Error procesando el CFDI:', error);
   }
 }
-
-main();
 ```
 
-## Uso Modular
+---
 
-Si prefieres realizar los pasos por separado, puedes utilizar las funciones individuales.
+## Métodos de la API
 
-### Parsear XML
+La clase `CFDIData` incluye métodos de utilidad para agilizar el desarrollo:
 
-Convierte el string XML en un objeto estructurado y tipado.
+### Validación de Comprobante
+- `isPUE()`: Indica si es Pago en una sola exhibición.
+- `isPPD()`: Indica si es Pago en parcialidades o diferido.
+- `isIngreso()`: Determina si el comprobante es de tipo Ingreso.
+- `isEgreso()`: Determina si el comprobante es de tipo Egreso (Nota de crédito).
 
-```typescript
-import { parseXML } from 'cfdi-kit';
+### Datos Fiscales
+- `getIVA()`: Retorna el total de IVA trasladado.
+- `getRetenciones()`: Retorna un desglose de retenciones (ISR, IVA, otros).
+- `getFechaEmision()`: Retorna un objeto `Date` con la fecha del comprobante.
 
-const data = parseXML(xmlContent);
-console.log(data.conceptos);
-```
+### Persistencia
+- `toJSON(directorio, nombreArchivo)`: Guarda el contenido del CFDI en un archivo JSON (solo Node.js).
 
-### Validar ante el SAT
+---
 
-Consulta el servicio SOAP del SAT para verificar si un comprobante es valido y vigente.
+## Funciones Principales
 
-```typescript
-import { validateSAT } from 'cfdi-kit';
-
-const response = await validateSAT({
-  re: 'RFC_EMISOR',
-  rr: 'RFC_RECEPTOR',
-  tt: '1234.56',
-  id: 'UUID-DE-LA-FACTURA'
-});
-
-console.log('Estado:', response.Estado); // Vigente, Cancelado, No Encontrado
-```
-
-## Referencia de API
-
-### CFDIData (Interfaz Principal)
-
-Objeto resultante del parseo y procesamiento.
-
-| Campo | Tipo | Descripcion |
-| :--- | :--- | :--- |
-| `info` | `Info` | Datos generales del comprobante (Version, Total, Moneda, Fecha, etc.) |
-| `emisor` | `Emisor` | RFC, Nombre y Regimen Fiscal del emisor |
-| `receptor` | `Receptor` | RFC, Nombre y Uso de CFDI del receptor |
-| `timbre` | `Timbre` | Datos del Timbre Fiscal Digital (UUID, Fecha, Sellos) |
-| `conceptos` | `Concepto[]` | Listado detallado de conceptos facturados |
-| `validation_sat` | `ValidationSat` | (Opcional) Resultado de la validacion ante el SAT |
-
-### Detalles de Tipos
-
-#### Info
-| Campo | Tipo |
+| Función | Descripción |
 | :--- | :--- |
-| `Version` | `string` |
-| `Serie` | `string` |
-| `Folio` | `string` |
-| `Fecha` | `string` |
-| `SubTotal` | `string` |
-| `Moneda` | `string` |
-| `Total` | `string` |
-| `TipoDeComprobante` | `string` |
-| `MetodoPago` | `string` |
-| `LugarExpedicion` | `string` |
+| `processCFDI(xml)` | Realiza el parseo y la validación ante el SAT de forma asíncrona. |
+| `parseXML(xml)` | Parsea el XML y retorna una instancia de `CFDIData`. |
+| `validateSAT(datos)` | Realiza la consulta de vigencia sin parsear el archivo. |
 
-#### Emisor
-| Campo | Tipo |
-| :--- | :--- |
-| `rfc` | `string` |
-| `nombre` | `string` |
-| `RegimenFiscal` | `string` |
-
-#### Receptor
-| Campo | Tipo |
-| :--- | :--- |
-| `rfc` | `string` |
-| `nombre` | `string` |
-| `DomicilioFiscalReceptor` | `string` |
-| `RegimenFiscalReceptor` | `string` |
-| `UsoCFDI` | `string` |
-
-#### Timbre
-| Campo | Tipo |
-| :--- | :--- |
-| `UUID` | `string` |
-| `FechaTimbrado` | `string` |
-| `RfcProvCertif` | `string` |
-| `SelloCFD` | `string` |
-| `NoCertificadoSAT` | `string` |
-| `SelloSAT` | `string` |
-
-#### Concepto
-| Campo | Tipo |
-| :--- | :--- |
-| `ClaveProdServ` | `string` |
-| `NoIdentificacion` | `string` |
-| `Cantidad` | `string` |
-| `ClaveUnidad` | `string` |
-| `Unidad` | `string` |
-| `Descripcion` | `string` |
-| `ValorUnitario` | `string` |
-| `Importe` | `string` |
-| `ObjetoImp` | `string` |
-
-#### ValidationSat
-| Campo | Tipo | Descripcion |
-| :--- | :--- | :--- |
-| `status` | `string` | Estado de la peticion ('success', 'error', 'pending') |
-| `is_valid` | `boolean` | Indica si el comprobante es Vigente ante el SAT |
-| `message` | `string` | Mensaje de error en caso de fallo |
-| `details` | `SATValidationResponse` | Respuesta completa del servicio SOAP del SAT |
-
-### Funciones
-
-- `parseXML(xml: string): CFDIData`: Analiza el contenido XML y devuelve el objeto estructurado.
-- `validateSAT(req: SATValidationRequest): Promise<SATValidationResponse>`: Consulta el estado del CFDI en los servidores del SAT.
-- `processCFDI(xml: string): Promise<CFDIData>`: Ejecuta el flujo completo (parseo + validacion).
+---
 
 ## Licencia
 
-MIT
+MIT © [Carlos Urías](https://github.com/CarlosUriass)
