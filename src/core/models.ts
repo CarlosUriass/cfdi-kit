@@ -118,4 +118,39 @@ export class CFDIData {
 
     return res;
   }
+
+  /**
+   * Indica si el método de pago es "Pago en una sola exhibición".
+   */
+  isPUE(): boolean {
+    return this.info.MetodoPago === 'PUE';
+  }
+
+  /**
+   * Indica si el método de pago es "Pago en parcialidades o diferido".
+   */
+  isPPD(): boolean {
+    return this.info.MetodoPago === 'PPD';
+  }
+
+  /**
+   * Indica si el comprobante es de tipo "Ingreso" (Factura).
+   */
+  isIngreso(): boolean {
+    return this.info.TipoDeComprobante === 'I';
+  }
+
+  /**
+   * Indica si el comprobante es de tipo "Egreso" (Nota de crédito).
+   */
+  isEgreso(): boolean {
+    return this.info.TipoDeComprobante === 'E';
+  }
+
+  /**
+   * Devuelve la fecha de emisión del CFDI como un objeto Date de JS.
+   */
+  getFechaEmision(): Date {
+    return new Date(this.info.Fecha);
+  }
 }
