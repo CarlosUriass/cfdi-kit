@@ -1,27 +1,5 @@
-export class CFDIData {
-  info: Info
-  emisor: Emisor
-  receptor: Receptor
-  timbre: Timbre
-  conceptos: Concepto[]
-  validation_sat?: ValidationSat
-
-  constructor(data: {
-    info: Info;
-    emisor: Emisor;
-    receptor: Receptor;
-    timbre: Timbre;
-    conceptos: Concepto[];
-    validation_sat?: ValidationSat;
-  }) {
-    this.info = data.info;
-    this.emisor = data.emisor;
-    this.receptor = data.receptor;
-    this.timbre = data.timbre;
-    this.conceptos = data.conceptos;
-    this.validation_sat = data.validation_sat;
-  }
-}
+// Las definiciones de CFDIData y Concepto se han movido a ./core/models.ts
+// para separar la lógica de las interfaces puras.
 
 export interface ValidationSat {
   status: string;
@@ -85,14 +63,3 @@ export interface Timbre {
   SelloSAT: string
 }
 
-export interface Concepto {
-  ClaveProdServ: string
-  NoIdentificacion: string
-  Cantidad: string
-  ClaveUnidad: string
-  Unidad: string
-  Descripcion: string
-  ValorUnitario: string
-  Importe: string
-  ObjetoImp: string
-}

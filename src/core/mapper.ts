@@ -1,4 +1,5 @@
-import { CFDIData, Info, Emisor, Receptor, Timbre, Concepto } from "../types.js";
+import { Info, Emisor, Receptor, Timbre } from "../types.js";
+import { CFDIData, Concepto } from "./models.js";
 
 /**
  * Mapea el objeto JSON bruto del parser a la estructura CFDIData limpia.

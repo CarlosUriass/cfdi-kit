@@ -1,6 +1,6 @@
 import { parseXML } from "./parser.js";
 import { validateSAT } from "./sat-validator.js";
-import { CFDIData } from "../types.js";
+import { CFDIData } from "./models.js";
 
 /**
  * Procesa un XML de CFDI de principio a fin: lo parsea y valida su estado ante el SAT.

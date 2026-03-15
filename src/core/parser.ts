@@ -1,5 +1,5 @@
 import { XMLParser, XMLValidator } from "fast-xml-parser";
-import { CFDIData } from "../types.js";
+import { CFDIData } from "./models.js";
 import { mapCFDI } from "./mapper.js";
 
 /**
