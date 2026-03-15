@@ -63,3 +63,23 @@ export interface Timbre {
   SelloSAT: string
 }
 
+export interface Impuestos {
+  TotalImpuestosTrasladados?: string;
+  TotalImpuestosRetenidos?: string;
+  Traslados: Traslado[];
+  Retenciones: Retencion[];
+}
+
+export interface Traslado {
+  Base: string;
+  Impuesto: string;
+  TipoFactor: string;
+  TasaOCuota: string;
+  Importe: string;
+}
+
+export interface Retencion {
+  Impuesto: string;
+  Importe: string;
+}
+

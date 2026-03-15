@@ -18,7 +18,7 @@ export function parseXML(xmlContent: string): CFDIData {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "",
-    parseAttributeValue: true,
+    parseAttributeValue: false,
   });
 
   const jsonObj = parser.parse(xmlContent);

@@ -1,4 +1,4 @@
-import { Info, Emisor, Receptor, Timbre, ValidationSat } from "../types.js";
+import { Info, Emisor, Receptor, Timbre, ValidationSat, Impuestos, Traslado, Retencion } from "../types.js";
 
 export interface Concepto {
   ClaveProdServ: string
@@ -18,6 +18,7 @@ export class CFDIData {
   receptor: Receptor
   timbre: Timbre
   conceptos: Concepto[]
+  impuestos?: Impuestos
   validation_sat?: ValidationSat
 
   constructor(data: {
@@ -26,6 +27,7 @@ export class CFDIData {
     receptor: Receptor;
     timbre: Timbre;
     conceptos: Concepto[];
+    impuestos?: Impuestos;
     validation_sat?: ValidationSat;
   }) {
     this.info = data.info;
@@ -33,6 +35,7 @@ export class CFDIData {
     this.receptor = data.receptor;
     this.timbre = data.timbre;
     this.conceptos = data.conceptos;
+    this.impuestos = data.impuestos;
     this.validation_sat = data.validation_sat;
   }
 
@@ -81,5 +84,38 @@ export class CFDIData {
     await (fs as any).writeFile(targetPath, data, 'utf-8');
 
     return (path as any).resolve(targetPath);
+  }
+
+  /**
+   * Devuelve el total de IVA trasladado.
+   * Busca en los impuestos globales el impuesto 002 (IVA).
+   */
+  getIVA(): number {
+    if (!this.impuestos?.Traslados) return 0;
+    
+    return this.impuestos.Traslados
+      .filter(t => ['002', '2', 'IVA'].includes(t.Impuesto))
+      .reduce((acc, t) => acc + parseFloat(t.Importe || '0'), 0);
+  }
+
+  /**
+   * Devuelve un desglose de retenciones por tipo (ISR, IVA).
+   */
+  getRetenciones(): { ISR: number; IVA: number; otros: number } {
+    const res = { ISR: 0, IVA: 0, otros: 0 };
+    if (!this.impuestos?.Retenciones) return res;
+
+    this.impuestos.Retenciones.forEach(r => {
+      const importe = parseFloat(r.Importe || '0');
+      if (['001', '1', 'ISR'].includes(r.Impuesto)) {
+        res.ISR += importe;
+      } else if (['002', '2', 'IVA'].includes(r.Impuesto)) {
+        res.IVA += importe;
+      } else {
+        res.otros += importe;
+      }
+    });
+
+    return res;
   }
 }
